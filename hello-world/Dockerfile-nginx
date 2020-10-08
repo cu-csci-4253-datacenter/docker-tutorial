@@ -1,0 +1,20 @@
+#
+# Sometimes you don't care about the underlying linux distribution
+# and you can use a pre-built container
+#
+FROM nginx:1.9
+
+#
+# But, you need to RTFM and configure things the way they expect
+#
+COPY	index.html	/usr/share/nginx/html
+VOLUME	/usr/share/nginx/html/dir
+
+##
+## All the rest is specified by the nginx container
+##
+
+
+
+
+

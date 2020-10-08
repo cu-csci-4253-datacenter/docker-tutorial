@@ -1,0 +1,76 @@
+#
+# Your dockerfile is typically based on an earlier image.
+# The format is "name:tag" where tag names a specific version.
+# The tag "latest" refers to, obviously, the latest version.
+# Your should use an explicit version and not "latest" because
+# the ability to rebuild your image depends on having a known base.
+# The "latest" tag may change from one build to the next.
+#
+FROM ubuntu:20.04
+
+#
+# RUN commands modify the build image so far. Each RUN adds a "layer"
+# to the stackable image; it's common to see compound shell commands
+# separated by "&&" (only continue if command succeeds) and "\" (line continuation).
+#
+# Is using package managers, they will only have old (or missing) state and you'll
+# need to update them to include current repositories. You'll need to provide options
+# that 
+#
+
+RUN	DEBIAN_FRONTEND=noninteractive apt-get update -y && \
+	apt-get install -yq --no-install-recommends \
+	   nginx
+
+#
+# When you build an image, you specify the "context" or directory from which
+# included files can be pulled. You can then COPY or ADD files to the build
+# image from that context
+#
+COPY	index.html	/var/www/html
+
+#
+# Containers communicate with the outside world through network ports and storage through volumes.
+#
+EXPOSE	80
+
+#
+# We can also specify where we expect external volumes to be mounted
+#
+VOLUME	/var/www/html/dir
+
+#
+# Docker runs a single process from which all other processes
+# are spawned. In UNIX systems, which would typically be an "init"
+# process that then spawns applications using mechanisms like systemd
+#
+# In this example we use "tini" ( https://github.com/krallin/tini )
+# which is a small "init". The "init" process handles zombie processes
+# and something similar should be used for production containers. If
+# you need to launch multiple processes, the "supervisord" program
+# is a good alternative.
+#
+ENV TINI_VERSION v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+
+#
+# The entry point is the actual program that is run when the container starts.
+# Both ENTRYPOINT and CMD have two forms. This uses the "array form" while
+# our earlier examples used a "shell form". In the "shell form", a shell
+# is started to interpret the command.
+# 
+ENTRYPOINT ["/tini", "--"]
+
+#
+# The CMD is actually an argument to the ENTRYPOINT. This means
+# the following commands will be arguments to the "tini" program
+# named above. 
+#
+CMD	/usr/sbin/nginx -c /etc/nginx/nginx.conf && \
+	tail -f /var/log/nginx/access.log
+
+
+
+
+
