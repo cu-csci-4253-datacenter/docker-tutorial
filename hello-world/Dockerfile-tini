@@ -70,6 +70,10 @@ ENTRYPOINT ["/tini", "--"]
 CMD	/usr/sbin/nginx -c /etc/nginx/nginx.conf && \
 	tail -f /var/log/nginx/access.log
 
+##
+## You would run this using:
+## docker run -it --rm -p 8888:80 -v $(pwd)/subdir:/var/www/html/dir tutorial-hello-world
+##
 
 
 
